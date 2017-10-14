@@ -55,7 +55,7 @@ def clean_up_sentence(sentence):
     return sentence_words
 
 # return bag of words array: 0 or 1 for each word in the bag that exists in the sentence
-def bow(sentence, words, show_details=False):
+def bow(sentence, words):
     # tokenize the pattern
     sentence_words = clean_up_sentence(sentence)
     # bag of words
@@ -64,13 +64,8 @@ def bow(sentence, words, show_details=False):
         for i,w in enumerate(words):
             if w == s:
                 bag[i] = 1
-                if show_details:
-                    print ("found in bag: %s" % w)
 
     return(np.array(bag))
-
-# create a data structure to hold user context
-context = {}
 
 ERROR_THRESHOLD = 0.25
 def classify(sentence):
@@ -86,7 +81,7 @@ def classify(sentence):
     # return tuple of intent and probability
     return return_list
 
-def response(sentence, userID='123', show_details=False):
+def response(sentence):
     results = classify(sentence)
     # if we have a classification then find the matching intent tag
     if results:
@@ -95,17 +90,8 @@ def response(sentence, userID='123', show_details=False):
             for i in intents['intents']:
                 # find a tag matching the first result
                 if i['tag'] == results[0][0]:
-                    # set context for this intent if necessary
-                    if 'context_set' in i:
-                        if show_details: print ('context:', i['context_set'])
-                        context[userID] = i['context_set']
-
-                    # check if this intent is contextual and applies to this user's conversation
-                    if not 'context_filter' in i or \
-                        (userID in context and 'context_filter' in i and i['context_filter'] == context[userID]):
-                        if show_details: print ('tag:', i['tag'])
-                        # a random response from the intent
-                        return random.choice(i['responses'])
+                    # a random response from the intent
+                    return random.choice(i['responses'])
 
             results.pop(0)
 
