@@ -1,3 +1,11 @@
+print 'Loading the libraries, data structures and model for our bot...',
+# start init ------------------------------------------------------------------
+import sys
+sys.stdout.flush()
+
+import time
+start = time.time()
+# loading the libraries takes the longest.. like 6-7 seconds
 # things we need for NLP
 import nltk
 from nltk.stem.lancaster import LancasterStemmer
@@ -9,7 +17,7 @@ import tflearn
 import tensorflow as tf
 import random
 
-# restore all of our data structures
+# restore all of our data structures (super quick 0.009 seconds)
 import pickle
 data = pickle.load( open( "training_data", "rb" ) )
 words = data['words']
@@ -17,20 +25,27 @@ classes = data['classes']
 train_x = data['train_x']
 train_y = data['train_y']
 
-# import our chat-bot intents file
+# import our chat-bot intents file (almost instant 0.0004 seconds)
 import json
 with open('intents.json') as json_data:
     intents = json.load(json_data)
 
-# Build neural network
+# Build neural network (0.14 seconds)
 net = tflearn.input_data(shape=[None, len(train_x[0])])
 net = tflearn.fully_connected(net, 8)
 net = tflearn.fully_connected(net, 8)
 net = tflearn.fully_connected(net, len(train_y[0]), activation='softmax')
 net = tflearn.regression(net)
 
-# Define model and setup tensorboard
+# Define model and setup tensorboard (1.79 seconds)
 model = tflearn.DNN(net, tensorboard_dir='tflearn_logs')
+
+# load our saved model (0.965 seconds)
+model.load('./model.tflearn')
+
+end = time.time()
+print 'done (%s seconds)' % (end-start)
+# end init ------------------------------------------------------------------
 
 def clean_up_sentence(sentence):
     # tokenize the pattern
@@ -53,9 +68,6 @@ def bow(sentence, words, show_details=False):
                     print ("found in bag: %s" % w)
 
     return(np.array(bag))
-
-# load our saved model
-model.load('./model.tflearn')
 
 # create a data structure to hold user context
 context = {}
@@ -98,6 +110,21 @@ def response(sentence, userID='123', show_details=False):
             results.pop(0)
 
 question = 'Hi man. How are you doing?'
+print question
+print classify(question)
+print response(question) # this only takes like 0.2 seconds to work out
+
+question = 'Well thank you. See you!'
+print question
+print classify(question)
+print response(question)
+
+question = 'Bye for now'
+print question
+print classify(question)
+print response(question)
+
+question = 'Can I rent a moped please?'
 print question
 print classify(question)
 print response(question)
